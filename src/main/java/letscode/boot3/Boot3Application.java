@@ -22,7 +22,7 @@ import java.util.Map;
 public class Boot3Application {
 
     private static DefaultCustomerService transactionalCustomerService(
-            TransactionTemplate tt,
+            TransactionTemplate transactionTemplate,
             DefaultCustomerService delegate) {
         var pfb = new ProxyFactoryBean();
         pfb.setTarget(delegate);
@@ -30,7 +30,7 @@ public class Boot3Application {
         pfb.addAdvice((MethodInterceptor) invocation -> {
             var method = invocation.getMethod();
             var args = invocation.getArguments();
-            return tt.execute(status -> {
+            return transactionTemplate.execute(status -> {
                 try {
                     return method.invoke(delegate, args);
                 } catch (Exception e) {
@@ -52,12 +52,16 @@ public class Boot3Application {
 
         var ptm = new DataSourceTransactionManager(dataSource);
         ptm.afterPropertiesSet();
+
         var tt = new TransactionTemplate(ptm);
         tt.afterPropertiesSet();
-        var cs = transactionalCustomerService(tt, new DefaultCustomerService(template));
+
+        var cs =  transactionalCustomerService(tt, new DefaultCustomerService(template));
+
         var juergen = cs.add("Jürgen");
         var stephane = cs.add("Stéphane");
         var josh = cs.add("Josh");
+
         var all = cs.all();
         Assert.state(all.contains(juergen) && all.contains(stephane),
                 "we didn't add Stéphane and Jürgen successfully!");
@@ -91,19 +95,15 @@ class DefaultCustomerService   {
             return ps;
         }, keyHolder);
         var generatedId = keyHolder.getKeys().get("id");
-        log.info("generatedId: {}", generatedId.toString());
         Assert.state(generatedId instanceof Number, "the generatedId must be a Number!");
-        Number number = (Number) generatedId;
+        var number = (Number) generatedId;
         return byId(number.intValue());
-
     }
-
 
     public Customer byId(Integer id) {
         return template.queryForObject(
                 "select id, name  from customers where id =? ", customerRowMapper, id);
     }
-
 
     public Collection<Customer> all() {
         return template.query("select id, name  from customers", this.customerRowMapper);

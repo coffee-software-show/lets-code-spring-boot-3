@@ -19,10 +19,6 @@ public class Boot3Application {
         SpringApplication.run(Boot3Application.class, args);
     }
 
-    @Bean
-    ApplicationListener <ApplicationReadyEvent> rabbitListener (RabbitProperties properties) {
-        return event -> log.info(properties.getHost());
-    }
 
     @Bean
     ApplicationListener<WebServerInitializedEvent> webServerInitializedEventApplicationListener() {

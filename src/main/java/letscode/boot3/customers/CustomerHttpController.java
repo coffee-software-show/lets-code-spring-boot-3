@@ -1,8 +1,11 @@
 package letscode.boot3.customers;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,23 +48,36 @@ class CustomerHttpController {
 	}*/
 
 
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    @RequiredArgsConstructor
+    static class CustomerModel extends RepresentationModel<CustomerModel> {
+        private final Customer customer;
+    }
 
-    @GetMapping("/customers/{id}")
-    HttpEntity<CustomerRepresentationalModel> customerById(@PathVariable Integer id) {
-        var customer = this.customerService.byId(id);
-        var customerRepresentationalModel = new CustomerRepresentationalModel(
-                customer.name(), customer.id());
-        var link = linkTo(methodOn(CustomerHttpController.class).customers()).withRel("customers");
-        customerRepresentationalModel.add(link);
-        customerRepresentationalModel.add(
-                linkTo(methodOn(CustomerHttpController.class).customerById(id)).withSelfRel()
-        );
-        return new ResponseEntity<>(customerRepresentationalModel, HttpStatus.OK);
+    @Data
+    @EqualsAndHashCode(callSuper = true)
+    @RequiredArgsConstructor
+    static class CustomersModel extends RepresentationModel<CustomersModel> {
+        private final Collection<Customer> customers;
     }
 
     @GetMapping("/customers")
-    Collection<Customer> customers() {
-        return this.customerService.all();
+    HttpEntity<CustomersModel> customers() {
+        var customers = this.customerService.all();
+        var customerRepresentationalModel = new CustomersModel(customers);
+        customerRepresentationalModel.add(linkTo(methodOn(CustomerHttpController.class).customers()).withSelfRel());
+        customerRepresentationalModel.add(linkTo(methodOn(CustomerHttpController.class).customersById(null)).withRel("customers-by-id"));
+        return ResponseEntity.ok(customerRepresentationalModel);
+    }
+
+    @GetMapping("/customers/{id}")
+    HttpEntity<CustomerModel> customersById(@PathVariable Integer id) {
+        var customer = this.customerService.byId(id);
+        var customerRepresentationalModel = new CustomerModel(customer);
+        customerRepresentationalModel.add(linkTo(methodOn(CustomerHttpController.class).customers()).withRel("customers"));
+        customerRepresentationalModel.add(linkTo(methodOn(CustomerHttpController.class).customersById(id)).withSelfRel());
+        return ResponseEntity.ok(customerRepresentationalModel);
     }
 
 

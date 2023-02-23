@@ -22,7 +22,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @ResponseBody
 class CustomerHttpController {
 
-
     private final CustomerService customerService;
 
     CustomerHttpController(CustomerService customerService) {
@@ -36,8 +35,8 @@ class CustomerHttpController {
     // OPTIONS
     // PUT
     // PATCH
-    //
-/*@RequestMapping("/greeting")
+/*
+    @RequestMapping("/greeting")
 	public HttpEntity<Greeting> greeting(
 		@RequestParam(value = "name", defaultValue = "World") String name) {
 
@@ -45,7 +44,8 @@ class CustomerHttpController {
 		greeting.add(linkTo(methodOn(GreetingController.class).greeting(name)).withSelfRel());
 
 		return new ResponseEntity<>(greeting, HttpStatus.OK);
-	}*/
+	}
+*/
 
 
     @Data

@@ -15,8 +15,9 @@ class CustomerInitializationConfiguration {
     ApplicationListener<ApplicationReadyEvent> applicationReadyEventApplicationListener(CustomerService cs) {
         return event -> {
             log.info("cs.class={}", cs.getClass().getName());
-            var juergen = cs.add("Jürgen");
-            var stephane = cs.add("Stéphane");
+            var juergen = cs.add("Jürgen" ,false);
+            var stephane = cs.add("Stéphane" ,false);
+            var josh = cs.add("Josh" ,true );
             var all = cs.all();
             Assert.state(all.contains(juergen) && all.contains(stephane),
                     "we didn't add Stéphane and Jürgen successfully!");

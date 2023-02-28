@@ -1,4 +1,8 @@
 package letscode.boot3.customers;
 
-public record Customer(Integer id, String name, boolean subscribed) {
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Table (name = "customers" )
+public record Customer(@Id Integer id,  String name, boolean subscribed) {
 }

@@ -2,17 +2,11 @@ package letscode.boot3.customers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -20,46 +14,27 @@ import java.util.Map;
 class CustomerService {
 
     private final ApplicationEventPublisher publisher;
-    private final JdbcTemplate template;
-    private final RowMapper<Customer> customerRowMapper =
-            (resultSet, rowNum) -> new Customer(resultSet.getInt("id"), resultSet.getString("name"),
-                    resultSet.getBoolean("subscribed"));
+    private final CustomerRepository repository;
 
-    CustomerService(JdbcTemplate template, ApplicationEventPublisher publisher) {
-        this.template = template;
+    CustomerService(ApplicationEventPublisher publisher, CustomerRepository repository) {
         this.publisher = publisher;
+        this.repository = repository;
     }
 
     public Customer add(String name, boolean subscribed) {
-        var al = new ArrayList<Map<String, Object>>();
-        al.add(Map.of("id", Long.class));
-        var keyHolder = new GeneratedKeyHolder(al);
-        template.update(con -> {
-            var ps = con.prepareStatement("""
-                              insert into customers (name , subscribed ) values(?, ?)
-                              on conflict on constraint customers_name_key do update set 
-                                  name = excluded.name ,
-                            subscribed = excluded.subscribed   
-                              """,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, name);
-            ps.setBoolean(2, subscribed);
-            return ps;
-        }, keyHolder);
-        var generatedId = keyHolder.getKeys().get("id");
-        Assert.state(generatedId instanceof Number, "the generatedId must be a Number!");
-        var number = (Number) generatedId;
-        var customer = byId(number.intValue());
-        this.publisher.publishEvent(new CustomerCreatedEvent(customer));
-        return customer;
+        var saved = this.repository.save(new Customer(null, name, subscribed));
+        this.publisher.publishEvent(new CustomerCreatedEvent(saved));
+        return saved;
     }
 
     public Customer byId(Integer id) {
-        return template.queryForObject(
-                "select id, name  ,subscribed  from customers where id =? ", customerRowMapper, id);
+        return this.repository.findById(id).orElse(null);
     }
 
     public Collection<Customer> all() {
-        return template.query("select id, name , subscribed  from customers", this.customerRowMapper);
+        var iterable = repository.findAll();
+        var list = new ArrayList<Customer>();
+        iterable.forEach(list::add);
+        return list;
     }
 }

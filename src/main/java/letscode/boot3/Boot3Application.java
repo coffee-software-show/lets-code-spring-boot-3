@@ -26,7 +26,6 @@ public class Boot3Application {
         return event -> repository.save(new Customer(null, "DaShaun", true));
     }
 
-
     @Bean
     ApplicationListener<WebServerInitializedEvent> webServerInitializedEventApplicationListener() {
         return event -> log.info("the web server is ready to serve HTTP traffic on port {}", event.getWebServer().getPort());

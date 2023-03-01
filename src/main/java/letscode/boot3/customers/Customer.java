@@ -14,14 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "customers")
 public class Customer {
-
     @Id
     private Integer id;
     private final String name;
     private final boolean subscribed;
-
-    @DomainEvents
-    Collection<CustomerCreatedEvent> domainEvents() {
-        return List.of(new CustomerCreatedEvent(this));
-    }
 }

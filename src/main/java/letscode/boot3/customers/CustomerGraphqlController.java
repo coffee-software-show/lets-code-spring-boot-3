@@ -26,16 +26,16 @@ class CustomerGraphqlController {
         return this.customerRepository.save(new Customer(null, name, subscribed));
     }
 
-    @QueryMapping
+/*    @QueryMapping
     Iterable<Customer> customersByName(@Argument String name) {
         return this.customerRepository.findByName(name);
-    }
+    }*/
 
-    @QueryMapping
+   /* @QueryMapping
     Customer customerById(@Argument Integer id) {
         return this.customerRepository.findById(id).orElseGet(null);
     }
-
+*/
     @SubscriptionMapping
     Flux<Customer> newCustomers() {
         return Flux.fromIterable(this.customers()).delayElements(Duration.ofSeconds(1));

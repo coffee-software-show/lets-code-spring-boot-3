@@ -27,7 +27,8 @@ public class Boot3Application {
             CustomerRepository repository) {
         return event -> {
             repository.deleteAll();
-            Set.of("A", "B", "C", "D").forEach(c -> repository.save(new Customer(null, c, Math.random() > .5)));
+            Set.of("A", "B", "C", "D").forEach(c -> repository.save(new Customer(null,
+                    c, Math.random() > .5)));
             repository.findAll(letscode.boot3.customers.QCustomer.customer.name.startsWith("A").not())
                   .forEach(System.out::println);
         };

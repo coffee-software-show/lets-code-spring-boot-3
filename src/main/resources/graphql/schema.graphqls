@@ -2,7 +2,9 @@ type Query {
 
  customers : [Customer]
  customersByName(name:String) : [Customer]
- customerById( id :ID ) :  Customer!
+ customerById( id:ID): Customer!
+ customersByNameStartingWith (name: String): [Customer]
+
 }
 
 type Mutation  {
@@ -17,6 +19,7 @@ type Customer {
  id: ID
  name: String
  profile: Profile
+ subscribed: Boolean
 }
 
 type Profile {

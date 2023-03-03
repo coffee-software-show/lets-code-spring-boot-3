@@ -25,11 +25,10 @@ configurations {
 }
 
 //
-def queryDslOutput = file(new File(projectDir, '/src/generated/'))
+def queryDslOutput = file(new File(projectDir, 'build/generated/sources/annotationProcessor/java/main'))
 sourceSets {
     main {
         java {
-//            srcDirs += ['build/generated/sources/annotationProcessor/java/main']
             srcDirs += queryDslOutput.absolutePath
         }
     }

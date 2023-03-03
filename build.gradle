@@ -29,7 +29,8 @@ def queryDslOutput = file(new File(projectDir, '/src/generated/'))
 sourceSets {
     main  {
         java {
-            srcDir queryDslOutput
+            srcDirs += ['build/generated/sources/annotationProcessor/java/main']
+//            srcDirs += queryDslOutput
         }
     }
 }

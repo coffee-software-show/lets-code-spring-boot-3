@@ -24,16 +24,7 @@ configurations {
     }
 }
 
-//
-def queryDslOutput = file(new File(projectDir, '/src/generated/'))
-sourceSets {
-    main  {
-        java {
-            srcDirs += ['build/generated/sources/annotationProcessor/java/main']
-//            srcDirs += queryDslOutput
-        }
-    }
-}
+sourceSets.main.java.srcDirs = ['build/classes/java/main', 'src/main/java']
 
 
 tasks.register('halp') {
@@ -69,10 +60,3 @@ tasks.named('test') {
 //    }
 //}
 
-compileJava {
-    options.compilerArgs << '-s'
-    options.compilerArgs << queryDslOutput.absolutePath
-    doFirst {
-        queryDslOutput.mkdirs();
-    }
-}

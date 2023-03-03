@@ -2,7 +2,6 @@ package letscode.boot3;
 
 
 import letscode.boot3.customers.Customer;
-import letscode.boot3.customers.CustomerCreatedEvent;
 import letscode.boot3.customers.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +12,8 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 
+import java.util.Set;
+
 @Slf4j
 @SpringBootApplication
 public class Boot3Application {
@@ -22,8 +23,14 @@ public class Boot3Application {
     }
 
     @Bean
-    ApplicationListener<ApplicationReadyEvent> readyEventApplicationListener(CustomerRepository repository) {
-        return event -> repository.save(new Customer(null, "DaShaun", true));
+    ApplicationListener<ApplicationReadyEvent> readyEventApplicationListener(
+            CustomerRepository repository) {
+        return event -> {
+            repository.deleteAll();
+            Set.of("A", "B", "C", "D").forEach(c -> repository.save(new Customer(null, c, Math.random() > .5)));
+            repository.findAll(letscode.boot3.customers.QCustomer.customer.name.startsWith("A").not())
+                  .forEach(System.out::println);
+        };
     }
 
     @Bean

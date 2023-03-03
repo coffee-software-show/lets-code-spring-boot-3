@@ -1,12 +1,22 @@
 version: '3'
 
 services:
-  postgres:
-    image: postgres:latest
-    environment:
-      - POSTGRES_USER=postgres
-      - PGUSER=postgres
-      - POSTGRES_NAME=postgres
-      - POSTGRES_PASSWORD=postgres
+
+  mongodb:
+    image: arm64v8/mongo:latest
+#    environment:
+#      MONGO_INITDB_DATABASE: database
+#      MONGO_INITDB_ROOT_USERNAME: username
+#      MONGO_INITDB_ROOT_PASSWORD: password
     ports:
-      - "5432:5432"
+      - 27017:27017
+#
+#  postgres:
+#    image: postgres:latest
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - PGUSER=postgres
+#      - POSTGRES_NAME=postgres
+#      - POSTGRES_PASSWORD=postgres
+#    ports:
+#      - "5432:5432"

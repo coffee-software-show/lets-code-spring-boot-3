@@ -38,7 +38,7 @@ class CustomerGraphqlController {
 
     @SubscriptionMapping
     Flux<Customer> newCustomers() {
-        return Flux.fromIterable( this.customers()).delayElements(Duration.ofSeconds(1));
+        return Flux.fromIterable(this.customers()).delayElements(Duration.ofSeconds(1));
     }
 
     @BatchMapping
@@ -46,21 +46,15 @@ class CustomerGraphqlController {
         log.info("calling the batch profile endpoint");
         var map = new HashMap<Customer, Profile>();
         for (var c : customers)
-            map.put(c, new Profile(c.getId())); // todo call batch network service
+            map.put(c, new Profile(c.id())); // todo call batch network service
         return map;
     }
 
-    /*@SchemaMapping(typeName = "Customer")
-    Mono<Profile> profile(Customer customer) throws Exception {
-        log.info("calling profile microservice for customer #{}", customer.getId());
-        return Mono.just(new Profile(customer.getId())).delayElement(Duration.ofSeconds(1));
-    }
-*/
     @QueryMapping
     Iterable<Customer> customers() {
         return this.customerRepository.findAll();
     }
 }
 
-record Profile(Integer id) {
+record Profile(String id) {
 }

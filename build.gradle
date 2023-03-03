@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'idea'
     id 'org.springframework.boot' version '3.0.3'
     id 'io.spring.dependency-management' version '1.1.0'
 }
@@ -17,15 +18,40 @@ configurations {
 repositories {
     mavenCentral()
 }
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+//
+def queryDslOutput = file(new File(projectDir, '/src/generated/'))
+sourceSets {
+    main  {
+        java {
+            srcDir queryDslOutput
+        }
+    }
+}
+
+
+tasks.register('halp') {
+    println(dependencyManagement.importedProperties['mongodb.version'])
+}
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:general"
+    implementation "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}"
+    implementation("com.querydsl:querydsl-mongodb:${dependencyManagement.importedProperties['querydsl.version']}") {
+        exclude group: 'org.mongodb', module: 'mongo-java-driver'
+    }
+    implementation 'com.querydsl:querydsl-core'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-graphql'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
@@ -34,4 +60,18 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+//tasks.named ('idea') {
+//    module {
+//        sourceDirs += queryDslOutput
+//    }
+//}
+
+compileJava {
+    options.compilerArgs << '-s'
+    options.compilerArgs << queryDslOutput.absolutePath
+    doFirst {
+        queryDslOutput.mkdirs();
+    }
 }

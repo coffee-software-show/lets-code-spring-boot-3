@@ -9,12 +9,6 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
@@ -24,27 +18,18 @@ configurations {
     }
 }
 
-//
-def queryDslOutput = file(new File(projectDir, '/src/generated/'))
 sourceSets {
     main {
         java {
-//            srcDirs += ['build/generated/sources/annotationProcessor/java/main']
-            srcDirs += queryDslOutput.absolutePath
+            srcDirs += "$projectDir/src/generated/"
         }
     }
 }
 
-
-tasks.register('halp') {
-    println(dependencyManagement.importedProperties['mongodb.version'])
-}
-
 dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:general"
-    implementation "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}"
-    implementation("com.querydsl:querydsl-mongodb:${dependencyManagement.importedProperties['querydsl.version']}") {
-        exclude group: 'org.mongodb', module: 'mongo-java-driver'
+    implementation("com.querydsl:querydsl-mongodb") {
+        exclude module: 'mongo-java-driver'
     }
     implementation 'com.querydsl:querydsl-core'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
@@ -61,18 +46,4 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-//tasks.named ('idea') {
-//    module {
-//        sourceDirs += queryDslOutput
-//    }
-//}
-
-compileJava {
-    options.compilerArgs << '-s'
-    options.compilerArgs << queryDslOutput.absolutePath
-    doFirst {
-        queryDslOutput.mkdirs();
-    }
 }

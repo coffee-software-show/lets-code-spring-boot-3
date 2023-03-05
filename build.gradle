@@ -12,6 +12,7 @@ sourceCompatibility = '17'
 repositories {
     mavenCentral()
 }
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -28,7 +29,7 @@ sourceSets {
 
 dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:general"
-    implementation("com.querydsl:querydsl-mongodb") {
+    implementation('com.querydsl:querydsl-mongodb') {
         exclude module: 'mongo-java-driver'
     }
     implementation 'com.querydsl:querydsl-core'

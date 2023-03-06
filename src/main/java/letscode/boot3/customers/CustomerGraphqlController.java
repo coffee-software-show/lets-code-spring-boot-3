@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,15 @@ class CustomerGraphqlController {
             map.put(c, new Profile(c.id())); // todo call batch network service
         return map;
     }
+
+
+    @QueryMapping
+    Collection<Customer> customersByName(@Argument String name) {
+        var results = this.customerRepository.findByName(name);
+        if (results.size() == 0) throw new CustomersNotFoundException("" + name);
+        return results ;
+    }
+
 
     @QueryMapping
     Iterable<Customer> customers() {

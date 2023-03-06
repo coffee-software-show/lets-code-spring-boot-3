@@ -2,8 +2,10 @@ package letscode.boot3;
 
 
 import io.micrometer.observation.ObservationRegistry;
+import jakarta.servlet.http.HttpServletRequest;
 import letscode.boot3.customers.Customer;
 import letscode.boot3.customers.CustomerRepository;
+import letscode.boot3.customers.CustomersNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -19,15 +21,16 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.observability.ContextProviderFactory;
 import org.springframework.data.mongodb.observability.MongoObservationCommandListener;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.filter.ServerHttpObservationFilter;
 
 import java.util.Map;
 import java.util.Set;
@@ -86,8 +89,21 @@ class IsJonatanAwesomeEndpoint {
 
 }
 
-@Configuration
+
+@Slf4j
+@ControllerAdvice
 class ObservabilityConfiguration {
+
+    @ExceptionHandler
+    ResponseEntity<?> customerNotFoundExceptionHandler(
+            HttpServletRequest request, CustomersNotFoundException customerNotFoundException) {
+        log.info("couldn't find the customer with name {}", customerNotFoundException.name());
+        ServerHttpObservationFilter
+                .findObservationContext(request)
+                .ifPresent(context -> context.setError(customerNotFoundException));
+        return ResponseEntity.notFound().build();
+
+    }
 
     @Bean
     MongoClientSettingsBuilderCustomizer mongoMetricsSynchronousContextProvider(ObservationRegistry registry) {
@@ -96,7 +112,6 @@ class ObservabilityConfiguration {
                 .addCommandListener(new MongoObservationCommandListener(registry));
     }
 }
-
 
 
 @Slf4j

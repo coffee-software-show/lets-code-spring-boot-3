@@ -3,7 +3,7 @@ version: '3'
 services:
 
   mongodb:
-    image: arm64v8/mongo:latest
+    image: mongo:latest
 #    environment:
 #      MONGO_INITDB_DATABASE: database
 #      MONGO_INITDB_ROOT_USERNAME: username

@@ -3,6 +3,9 @@ package letscode.boot3.customers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.*;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
@@ -20,22 +23,11 @@ class CustomerGraphqlController {
         this.customerRepository = customerRepository;
     }
 
-
     @MutationMapping
     Customer createCustomer(@Argument String name, @Argument boolean subscribed) {
         return this.customerRepository.save(new Customer(null, name, subscribed));
     }
 
-/*    @QueryMapping
-    Iterable<Customer> customersByName(@Argument String name) {
-        return this.customerRepository.findByName(name);
-    }*/
-
-   /* @QueryMapping
-    Customer customerById(@Argument Integer id) {
-        return this.customerRepository.findById(id).orElseGet(null);
-    }
-*/
     @SubscriptionMapping
     Flux<Customer> newCustomers() {
         return Flux.fromIterable(this.customers()).delayElements(Duration.ofSeconds(1));
@@ -52,7 +44,20 @@ class CustomerGraphqlController {
 
     @QueryMapping
     Iterable<Customer> customers() {
+        log.info("returning all the customers.");
         return this.customerRepository.findAll();
+    }
+}
+
+@Controller
+@ResponseBody
+@Slf4j
+class HelloWorldController {
+
+    @GetMapping("/hello/{name}")
+    Map<String, String> hello(@PathVariable String name) {
+        log.info("hello, " + name + '!');
+        return Map.of("message", "Hello, " + name + "!");
     }
 }
 

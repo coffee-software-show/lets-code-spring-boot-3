@@ -1,12 +1,16 @@
 package letscode.boot3;
 
 
+import io.micrometer.observation.ObservationRegistry;
 import letscode.boot3.customers.Customer;
 import letscode.boot3.customers.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.mongo.MongoClientSettingsBuilderCustomizer;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.AvailabilityState;
 import org.springframework.boot.availability.LivenessState;
@@ -15,10 +19,17 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.observability.ContextProviderFactory;
+import org.springframework.data.mongodb.observability.MongoObservationCommandListener;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
 import java.util.Set;
 
 // todo: Spring Session
@@ -54,15 +65,39 @@ public class Boot3Application {
 
     @Bean
     ApplicationListener<AvailabilityChangeEvent<? extends AvailabilityState>> availabilityChangeEventApplicationListener() {
-        return event -> log.info("the service is healthy? {}", event.getState().toString());
+        return event ->
+                log.info("the service is healthy? {}", event.getState().toString());
     }
-
 
 //    @Bean
 //    HealthIndicator healthIndicator() {
 //        return () -> Health.down(new IllegalArgumentException("something's wrong!")).build();
 //    }
 }
+
+@Component
+@Endpoint(id = "jonatan")
+class IsJonatanAwesomeEndpoint {
+
+    @ReadOperation
+    Map<String, Object> awesome() {
+        return Map.of("awesome", true);
+    }
+
+}
+
+@Configuration
+class ObservabilityConfiguration {
+
+    @Bean
+    MongoClientSettingsBuilderCustomizer mongoMetricsSynchronousContextProvider(ObservationRegistry registry) {
+        return (clientSettingsBuilder) -> clientSettingsBuilder
+                .contextProvider(ContextProviderFactory.create(registry))
+                .addCommandListener(new MongoObservationCommandListener(registry));
+    }
+}
+
+
 
 @Slf4j
 @Controller
@@ -86,6 +121,7 @@ class DownController {
 
     @GetMapping("/down")
     void down() {
-        this.publisher.publishEvent(new AvailabilityChangeEvent<LivenessState>(this, LivenessState.BROKEN));
+        this.publisher.publishEvent(
+                new AvailabilityChangeEvent<LivenessState>(this, LivenessState.BROKEN));
     }
 }

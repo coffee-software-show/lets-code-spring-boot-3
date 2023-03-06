@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'org.springframework.boot' version '3.0.3'
     id 'io.spring.dependency-management' version '1.1.0'
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
 
 group = 'com.example'
@@ -27,7 +28,23 @@ sourceSets {
     }
 }
 
+
+def actuatorDependencies = tasks.register("actuatorDependencies", DependencyReportTask) {
+    setConfiguration("runtimeClasspath")
+    outputFile = new java.io.File(project.buildDir.absoluteFile, "resources/main/gradle-classpath")
+}
+
+tasks
+        .matching { it.name != actuatorDependencies.name  }
+        .all { it.dependsOn actuatorDependencies  }
+
 dependencies {
+
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'com.joshlong:dependencies-actuator-spring-boot-starter:0.0.8'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:general"
     implementation('com.querydsl:querydsl-mongodb') {
         exclude module: 'mongo-java-driver'

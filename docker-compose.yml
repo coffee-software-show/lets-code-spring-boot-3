@@ -2,21 +2,15 @@ version: '3'
 
 services:
 
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    extra_hosts: [ 'host.docker.internal:host-gateway' ]
+    restart: always
+    ports:
+      - 9411:9411
+
   mongodb:
     image: arm64v8/mongo:latest
-#    environment:
-#      MONGO_INITDB_DATABASE: database
-#      MONGO_INITDB_ROOT_USERNAME: username
-#      MONGO_INITDB_ROOT_PASSWORD: password
     ports:
       - 27017:27017
-#
-#  postgres:
-#    image: postgres:latest
-#    environment:
-#      - POSTGRES_USER=postgres
-#      - PGUSER=postgres
-#      - POSTGRES_NAME=postgres
-#      - POSTGRES_PASSWORD=postgres
-#    ports:
-#      - "5432:5432"

@@ -39,6 +39,6 @@ services:
       - 9411:9411
 
   mongodb:
-    image: arm64v8/mongo:latest
+    image: mongo:latest
     ports:
       - 27017:27017

@@ -21,6 +21,12 @@ configurations {
     }
 }
 
+
+tasks.named('bootBuildImage') {
+    builder = 'dashaun/builder:tiny'
+    environment = ['BP_NATIVE_IMAGE': 'true']
+}
+
 sourceSets {
     main {
         java {
@@ -36,8 +42,8 @@ def actuatorDependencies = tasks.register("actuatorDependencies", DependencyRepo
 }
 
 tasks
-        .matching { it.name != actuatorDependencies.name  }
-        .all { it.dependsOn actuatorDependencies  }
+        .matching { it.name != actuatorDependencies.name }
+        .all { it.dependsOn actuatorDependencies }
 
 dependencies {
 

@@ -71,11 +71,6 @@ public class Boot3Application {
         return event ->
                 log.info("the service is healthy? {}", event.getState().toString());
     }
-
-//    @Bean
-//    HealthIndicator healthIndicator() {
-//        return () -> Health.down(new IllegalArgumentException("something's wrong!")).build();
-//    }
 }
 
 @Component
